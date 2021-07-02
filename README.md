@@ -21,10 +21,10 @@
 
 # Installation
 
-Requirementで列挙したライブラリなどのインストール方法を説明する
+
 
 ```bash
-pip install huga_package
+pip install -r requirement.txt
 ```
 
 # Usage
