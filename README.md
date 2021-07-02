@@ -36,9 +36,7 @@ pip install -r requirement.txt
 
 In the default settings, the following transfer function is optimized by [fmin](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.fmin.html).
 
-```math
-G\left(s\right)	= {\frac{5}{0.01s^2+0.2s+10}}
-```
+<img src='https://latex.codecogs.com/png.latex?G\left(s\right)&space;=&space;{\frac{5}{0.01s^2&plus;0.2s&plus;10}}' />
 
 Plese type following command.
 
