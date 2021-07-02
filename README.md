@@ -44,8 +44,7 @@ Plese type following command.
 ```bash
 git clone https://github.com/takoyagi77/vtiger4python vtiger_demo_python
 cd vtiger_demo_python
-# if necessary
-pip install -r requirement.txt
+pip install -r requirement.txt # <- if necessary
 python vtiger_class.py
 ```
 
@@ -78,13 +77,13 @@ K = matlab.tf([th[2], th[0], th[1]], [0, 1, 0])
 * ts       : Sampling time(type : float).
 * th0      : Init controller parameters(type : list). In case of PID controller, first one is proportional gain, second one is integral gain and last one is differential gain(all type : float).
 * wST      : Settling time threshold setting for evaluation step response(type : float).
-* OVr      : Allowable overshoot amount\[%\](type : float or int)
+* OVr      : Allowable overshoot amount \[%\](type : float or int).
+* GMr      : Gain margin \[dB\](type : float or int).
+* PMr      : Phase margin \[deg\](type : float or int).
+* optimize : Optimization method. Currently, it have 'fmin' and 'PSO'(type : str).
 
 
 
-# Note
-
-注意点などがあれば書く
 
 
 # License
