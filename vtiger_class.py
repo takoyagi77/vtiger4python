@@ -249,7 +249,7 @@ class Vtiger:
 
 		r00 = np.fft.ifft(r0jw); r00 = r00[0:round(len(r00) / 2)]
 		if np.linalg.norm(r00[:].real - r2) and self.count != 1:
-			self.count = 1  # 毎回出るので一回だけ警告することにする。 -> 問題では？
+			self.count = 1
 			print('Error in V-Tiger: Removed the frequency component of r that has a it not in u.')
 		return y, u, r2
 
