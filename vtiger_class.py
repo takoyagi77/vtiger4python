@@ -90,12 +90,6 @@ class Vtiger:
 		n = min(20, round(len(y00) / 10 + 1))
 		y00ave = sum(y00[-n:]) / n + y00[0]
 		y0 = np.array(y00.tolist() + list(map(lambda x: x + y00ave, -1 * y00)))
-		# a = pyfftw.empty_aligned(len(y0), dtype='complex128')
-		# b = pyfftw.empty_aligned(len(y0), dtype='complex128')
-		# c = pyfftw.empty_aligned(len(y0), dtype='complex128')
-		# fft_object = pyfftw.FFTW(a, b)
-		# c[:] = list(y0)
-		# y0jw = fft_object(c)
 		out = np.asarray(y0)
 		y0jw = np.fft.fft(out.reshape(-1))
 		N = len(y0jw)
@@ -142,9 +136,7 @@ class Vtiger:
 		fft4tf.m : The MATLAB version.
 		'''
 		w = np.append(1e-10, 2 * math.pi / (N / np.arange(1, N / 2 + 1, 1) * G.dt))
-		# plt.figure()
 		g, p, _ = matlab.bode(G, w.astype(np.float64), plot=0)  # g:Gain p:Phase[rad]
-		# plt.close()
 		gl, pl, _ = control.freqresp(G, [w[-1]])
 		g = np.append(g, gl); p = np.append(p, pl)
 		h = g * np.exp(1j * p)

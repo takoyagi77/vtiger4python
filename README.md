@@ -74,7 +74,7 @@ K = matlab.tf([th[2], th[0], th[1]], [0, 1, 0])
 
 * u00, y00 : Input/Output data list(type : ndarray).
 * r00, r   : Reference data list for feedback system(type : ndarray).
-* ts       : Sampling time(type : float).
+* ts       : Sampling time \[s\](type : float).
 * th0      : Init controller parameters(type : list). In case of PID controller, first one is proportional gain, second one is integral gain and last one is differential gain(all type : float).
 * wST      : Settling time threshold setting for evaluation step response(type : float).
 * OVr      : Allowable overshoot amount \[%\](type : float or int).
@@ -83,8 +83,16 @@ K = matlab.tf([th[2], th[0], th[1]], [0, 1, 0])
 * optimize : Optimization method. Currently, it have 'fmin' and 'PSO'(type : str).
 
 
+## Including method
 
+* fft4step
+* fft4tf
+* stepinfo
+* vtigerPID
 
+# Note
+
+I don't test environments under Linux and Mac.
 
 # License
 
