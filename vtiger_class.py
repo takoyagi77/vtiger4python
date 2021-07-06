@@ -141,7 +141,7 @@ class Vtiger:
 		--------
 		fft4tf.m : The MATLAB version.
 		'''
-		w = np.append(1e-10, 2 * math.pi / (N / np.arange(1, N / 2 + 1, 1) * G.dt))
+		w = np.append(1e-10, 2 * math.pi / (N / np.arange(1, N / 2, 1) * G.dt))
 		g, p, _ = matlab.bode(G, w.astype(np.float64), plot=0)  # g:Gain p:Phase[rad]
 		gl, pl, _ = control.freqresp(G, [w[-1]])
 		g = np.append(g, gl); p = np.append(p, pl)
@@ -486,7 +486,7 @@ if __name__ == '__main__':
 	options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
 	optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=3, options=options)
 
-	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize={'PSO': optimizer})
+	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0)
 	th = V.vtigerPID()
 	print(th)
 
