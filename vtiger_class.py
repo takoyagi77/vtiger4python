@@ -49,9 +49,15 @@ class Vtiger:
 		else:
 			self.PMr = 20
 		if 'optimize' in kwargs:
-			self.optimize = kwargs['optimize']
+			temp = kwargs['optimize']
+			try:
+				for i in temp.keys():
+					self.optimization = i
+				self.optimizer = temp[self.optimization]
+			except Exception:
+				self.optimization = 'fmin'
 		else:
-			self.optimize = 'fmin'
+			self.optimization = 'fmin'
 
 	def fft4step(self, y00):
 		'''
@@ -280,7 +286,7 @@ class Vtiger:
 			SettlingTimeThreshold = kwargs['SettlingTimeThreshold']
 		else:
 			SettlingTimeThreshold = 0.02
-		# 定常値を求める
+		# Calculate steady-state value
 		ylast = sum(y[-20:]) / len(y[-20:])
 		if args == ():
 			yfin = ylast
@@ -366,14 +372,16 @@ class Vtiger:
 			si = self.stepinfo(y[0:len(y) - 2], k[0:len(k) - 2], sum(r[len(r) - 20:len(r)]) / 20, SettlingTimeThreshold=self.wST)
 			J = si['SettlingTime']
 		if f:
-			print('aaa')#作る
+			plt.plot(np.ones(len(y), 1) * sum(r[-20:]) / 20 * [1 + self.wST, 1 - self.wST, 1 + self.OVr / 100])
+			plt.show()
+			return
 		if math.isnan(J):
 			J = 1e99
-		# print(J)
+		print('J=' + str(J))
 		return J
 
 	def J_cost2(self, th):
-		if self.optimize == 'PSO':
+		if self.optimization == 'PSO':
 			J = []
 			for i in th:
 				c, ceq = self.constraints(i)
@@ -433,10 +441,8 @@ class Vtiger:
 		else:
 			pass
 		
-		if self.optimize == 'PSO':
-			options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
-			optimizer = ps.single.GlobalBestPSO(n_particles=10, dimensions=3, options=options)
-			cost, th = optimizer.optimize(self.J_cost2, iters=500)
+		if self.optimization == 'PSO':
+			cost, th = self.optimizer.optimize(self.J_cost2, iters=500)
 		else:
 			th = fmin(self.J_cost2, th0)
 		
@@ -461,15 +467,12 @@ if __name__ == '__main__':
 	Ku, Pm, Wu, Wcp = matlab.margin(G)
 	Tu = 1 / (Wu / 2 / math.pi)
 	kp0 = 0.6 * Ku; ki0 = kp0 / (0.5 * Tu); kd0 = kp0 * 0.125 * Tu
-	# kp0 = 5
-	# kd0 = -1 / 4
-	# ki0 = 11
 	K0 = kp0 + ki0 / p + kd0 * p
 	th0 = [kp0, ki0, kd0]
 	th1 = copy.copy(th0)
 
 
-	N = 10000
+	N = 3000
 	u00 = np.ones([N, 1])
 	u00[0] = 0
 	t = np.arange(0, N * ts, ts)
@@ -479,16 +482,12 @@ if __name__ == '__main__':
 	r = u00
 	y00 = np.array(y00)
 	y00 = y00.reshape((len(y00), 1))
-	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize='PSO')
+
+	options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+	optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=3, options=options)
+
+	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize={'PSO': optimizer})
 	th = V.vtigerPID()
-	# V = Vtiger()
-	# freq = {'y0jw': V.fft4step(y00)[0], 'u0jw': V.fft4step(u00)[0], 'r0jw': V.fft4step(r)[0], 'p': V.fft4tf(p, len(u00) * 2), 'r': r}
-	# freq.update({'wST': 0.02})
-	# freq.update({'OVr': 2})
-	# freq.update({'GMr': 3})
-	# freq.update({'PMr': 20})
-	# freq.update({'th0': th0})
-	# th = V.vtigerPID(freq=freq)
 	print(th)
 
 	K = th[0] + th[1] / s + th[2] * s
