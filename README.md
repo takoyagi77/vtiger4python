@@ -56,7 +56,7 @@ Optimization is finished, result is visualized by [matplotlib](https://matplotli
 If you want to optimize more transfer functions or insert V-Tiger into another program, try the following code.
 
 ```python
-import vtiger_class
+from vtiger_class import Vtiger
 ...
 # setup the Particle Swarm Optimization
 options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
@@ -66,12 +66,12 @@ optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=3, options=option
 # The smallest argument setting
 V = Vtiger(u00=u00, y00=y00, r00=r, r=r, ts=ts, th0=th0)
 # The largest argument setting
-V = Vtiger(u00=u00, y00=y00, r00=r, r=r, ts=ts, th0=th0, wST=0.02, OVr=2, GMr=3, PMr=20, optimize={'PSO': optimizer})
+V = Vtiger(u00=u00, y00=y00, r00=r, r=r, ts=ts, th0=th0, wST=0.02, OVr=2, GMr=3, PMr=20, optimize={'PSO': optimizer, 'iters':500})
 # Optimize the controller
 th = V.VtigerPID()
 
-# PID controller design
-K = matlab.tf([th[2], th[0], th[1]], [0, 1, 0])
+# Calculated final result
+y, u, r = V.freq2yu({0: 0}, th)
 ```
 
 ### Parameter
@@ -84,7 +84,7 @@ K = matlab.tf([th[2], th[0], th[1]], [0, 1, 0])
 * OVr      : Allowable overshoot amount \[%\](type : float or int).
 * GMr      : Gain margin \[dB\](type : float or int).
 * PMr      : Phase margin \[deg\](type : float or int).
-* optimize : Optimization method. Currently, it have 'fmin' and 'PSO'. If you want to optimize by PSO, attach the PSO optimizer(type : dict or str).
+* optimize : Optimization method. Currently, it have 'fmin' and 'PSO'. If you want to optimize by PSO, attach the PSO optimizer and iters number(type : dict or str).
 
 
 ## Including method

@@ -51,6 +51,11 @@ class Vtiger:
 		if 'optimize' in kwargs:
 			temp = kwargs['optimize']
 			try:
+				if hasattr(temp, 'iters'):
+					self.iters = temp['iters']
+					temp.pop('iters')
+				else:
+					self.iters = 1000
 				for i in temp.keys():
 					self.optimization = i
 				self.optimizer = temp[self.optimization]
@@ -377,7 +382,7 @@ class Vtiger:
 			return
 		if math.isnan(J):
 			J = 1e99
-		print('J=' + str(J))
+		# print('J=' + str(J))
 		return J
 
 	def J_cost2(self, th):
@@ -442,7 +447,7 @@ class Vtiger:
 			pass
 		
 		if self.optimization == 'PSO':
-			cost, th = self.optimizer.optimize(self.J_cost2, iters=500)
+			cost, th = self.optimizer.optimize(self.J_cost2, iters=self.iters)
 		else:
 			th = fmin(self.J_cost2, th0)
 		
@@ -451,6 +456,7 @@ class Vtiger:
 
 
 if __name__ == '__main__':
+	### Define control target data.
 	s = matlab.tf('s')
 	count = 0
 	ts = 0.01
@@ -460,10 +466,11 @@ if __name__ == '__main__':
 
 	num1, den1 = matlab.pade(0.1, 5)
 	delay = matlab.tf(num1, den1)
-	G = matlab.c2d(Gs * delay, ts)
+	G = matlab.c2d(Gs, ts)
 	z = matlab.tf([1, 0], [0, 1], ts)
 	p = (1 - 1 / z) / ts
 
+	### Calculated Ziegler-Nichols' parameters.
 	Ku, Pm, Wu, Wcp = matlab.margin(G)
 	Tu = 1 / (Wu / 2 / math.pi)
 	kp0 = 0.6 * Ku; ki0 = kp0 / (0.5 * Tu); kd0 = kp0 * 0.125 * Tu
@@ -471,38 +478,42 @@ if __name__ == '__main__':
 	th0 = [kp0, ki0, kd0]
 	th1 = copy.copy(th0)
 
-
+	### Get one experience data.
 	N = 3000
 	u00 = np.ones([N, 1])
 	u00[0] = 0
 	t = np.arange(0, N * ts, ts)
-	(y00, t00, a) = matlab.lsim(Gs, U=u00, T=t)
+	(y00, t00, a) = matlab.lsim(G, U=u00.reshape([N,]), T=t)
 	plt.figure()
 	plt.plot(t00, y00)
 	r = u00
-	y00 = np.array(y00)
-	y00 = y00.reshape((len(y00), 1))
+	y00 = np.array(y00).reshape((N, 1))
 
+	### PSO options.
 	options = {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
 	optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=3, options=options)
 
+
+	### This is fmin's optimization.
 	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0)
+	### This is PSO's optimization.
+	# V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize={'PSO': optimizer, 'iters': 500})
 	th = V.vtigerPID()
 	print(th)
 
-	K = th[0] + th[1] / s + th[2] * s
-	K0 = th1[0] + th1[1] / s + th1[2] * s
-	G = Gs * K / (1 + Gs * K)
-	G0 = Gs * K0 / (1 + Gs * K0)
+	### Cheak the optimization result.
+	y, _, _ = V.freq2yu({0: 0}, th)
+	K0 = th1[0] + th1[1] / p + th1[2] * p
+	G0 = G * K0 / (1 + G * K0)
 	N = 3000
-	u = np.ones([N, 1])
+	u = np.ones([N,])
 	u[0] = 0
 	t = np.arange(0, N * ts, ts)
-	(y, t, _) = matlab.lsim(G, U=u, T=t)
 	(y0, t0, _) = matlab.lsim(G0, U=u, T=t)
 	plt.figure()
-	plt.plot(t, y, label='vtiger')
+	plt.plot(t, y, label='V-Tiger')
 	plt.plot(t0, y0, label='init')
 	plt.legend()
+	plt.xlim([-.5, 1])
 	plt.show()
 	plt.close('all')
