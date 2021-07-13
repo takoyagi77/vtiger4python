@@ -51,11 +51,7 @@ class Vtiger:
 		if 'optimize' in kwargs:
 			temp = kwargs['optimize']
 			try:
-				if hasattr(temp, 'iters'):
-					self.iters = temp['iters']
-					temp.pop('iters')
-				else:
-					self.iters = 1000
+				self.iters = temp.pop('iters', 1000)
 				for i in temp.keys():
 					self.optimization = i
 				self.optimizer = temp[self.optimization]
@@ -497,7 +493,7 @@ if __name__ == '__main__':
 	### This is fmin's optimization.
 	V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0)
 	### This is PSO's optimization.
-	# V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize={'PSO': optimizer, 'iters': 500})
+	# V = Vtiger(y00=y00, u00=u00, r00=r, r=r, ts=ts, th0=th0, optimize={'PSO': optimizer, 'iters': 1500})
 	th = V.vtigerPID()
 	print(th)
 
@@ -512,7 +508,7 @@ if __name__ == '__main__':
 	(y0, t0, _) = matlab.lsim(G0, U=u, T=t)
 	plt.figure()
 	plt.plot(t, y, label='V-Tiger')
-	plt.plot(t0, y0, label='init')
+	plt.plot(t, y0, label='init')
 	plt.legend()
 	plt.xlim([-.5, 1])
 	plt.show()
